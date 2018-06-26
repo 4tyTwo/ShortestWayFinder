@@ -1,8 +1,10 @@
+import java.awt.*;
 import java.util.Scanner;
 
 public class ShortestWayFinder {
 
     private int matrix[][]; //Представление матрицы, хранящее путь до текущей точки
+    private Point[] path; //Массив точек, через которые проходит путь
     private int rows, columns;
     private int finishRow,finishColumn;
     /*Внутреннее представление матрицы:
@@ -25,8 +27,13 @@ public class ShortestWayFinder {
         for (int i = 0; i < rows; ++i){
             map[i] = reader.nextLine();
         }*/
-        String[] map = {"****X","*###*","*****","***#*","*O***"};
+        String[] map = {"****X",
+                        "*###*",
+                        "*****",
+                        "***#*",
+                        "*O***"};
         ShortestWayFinder swf = new ShortestWayFinder(map);
+        swf.findPath();
     }
 
     public ShortestWayFinder(String[] source){
@@ -54,6 +61,10 @@ public class ShortestWayFinder {
     }
 
     public int findPath(){
+        int[][]tmpMatrix = new int[rows][columns];
+        for (int i = 0; i < rows; ++i) {
+            System.arraycopy(matrix[i], 0, tmpMatrix[i], 0, columns);
+        }
         int step = 0, distance = 0;
         boolean finishReached = false;
         findFinish();
@@ -61,42 +72,107 @@ public class ShortestWayFinder {
             for (int i = 0; i < rows; ++i){
                 for (int j = 0; j < columns; ++j) {
                     //Условимся, что движение по диагонали с шагом 1 невозможно
-                    try {
-                        if(matrix[i][j] == distance){
+                        if(tmpMatrix[i][j] == distance){
                             //4 клетки вокруг
-                            if(matrix[i - 1][j] == -2 || matrix[i - 1][j] == -1  ){
-                                matrix[i - 1][j] = distance + 1;
+                            if (i - 1 >= 0) {
+                                if (tmpMatrix[i - 1][j] == -2 || tmpMatrix[i - 1][j] == -1) {
+                                    tmpMatrix[i - 1][j] = distance + 1;
+                                }
                             }
-                            if(matrix[i + 1][j] == -2 || matrix[i + 1][j] == -1) {
-                                matrix[i + 1][j] = distance + 1;
+                            if (i + 1 < rows) {
+                                if (tmpMatrix[i + 1][j] == -2 || tmpMatrix[i + 1][j] == -1) {
+                                    tmpMatrix[i + 1][j] = distance + 1;
+                                }
                             }
-                            if(matrix[i][j - 1] == -2 || matrix[i][j - 1] == -1) {
-                                matrix[i][j - 1] = distance + 1;
+                            if (j - 1 >= 0) {
+                                if (tmpMatrix[i][j - 1] == -2 || tmpMatrix[i][j - 1] == -1) {
+                                    tmpMatrix[i][j - 1] = distance + 1;
+                                }
                             }
-                            if(matrix[i][j + 1] == -2 || matrix[i][j + 1] == -1) {
-                                matrix[i][j + 1] = distance + 1;
+                            if (j + 1 < columns) {
+                                if (tmpMatrix[i][j + 1] == -2 || tmpMatrix[i][j + 1] == -1) {
+                                    tmpMatrix[i][j + 1] = distance + 1;
+                                }
                             }
                         }
-                    }
-                    catch (IndexOutOfBoundsException e){
-                        //pass
-                        //TO DO заменить на нормальные проверки
-                    }
                 }
             }
             distance++;
-            if (matrix[finishRow][finishColumn]!= -1){
-                //printMatrix();
+            if (tmpMatrix[finishRow][finishColumn]!= -1){
+                path = new Point[distance+1];
+                createPath(tmpMatrix);
+                printMatrix();
                 return distance;
             }
         }
         return -1; //Путь не найден
     }
 
+    private void createPath(int[][] tmpMatrix){
+        //При наличии равно великих путей, выбираться будет только 1
+        int currRow = finishRow, currColumn = finishColumn;
+        boolean moved;
+        int i = 0;
+        int curr = tmpMatrix[currRow][currColumn];
+        while (curr!=0){
+            moved = false;
+            if (currRow - 1 >= 0) {
+                if (tmpMatrix[currRow - 1][currColumn] == curr - 1 && !moved) {
+                    --curr;
+                    --currRow;
+                    moved = true;
+                }
+            }
+            if (currRow + 1 < rows) {
+                if (tmpMatrix[currRow + 1][currColumn] == curr - 1 && !moved) {
+                    --curr;
+                    ++currRow;
+                    moved = true;
+                }
+            }
+            if (currColumn - 1 >= 0) {
+                if (tmpMatrix[currRow][currColumn - 1] == curr - 1 && !moved) {
+                    --curr;
+                    --currColumn;
+                    moved = true;
+                }
+            }
+            if (currColumn + 1 < columns) {
+                if (tmpMatrix[currRow][currColumn + 1] == curr - 1 && !moved) {
+                    --curr;
+                    ++currColumn;
+                    moved = true; //Не нужно, но есть для единообразия кода
+                }
+            }
+            path[i++] = new Point(currRow,currColumn);
+            matrix[currRow][currColumn] = curr;
+        }
+    }
+
+    public void printMatrix(){
+        for (int i = 0; i < matrix.length; ++i){
+            for (int j = 0; j < matrix[i].length; ++j) {
+                switch (matrix[i][j]){
+                    case -3: System.out.print('#');
+                        break;
+                    case -2: System.out.print('.');
+                        break;
+                    case -1: System.out.print('X');
+                        break;
+                    case 0: System.out.print('O');
+                        break;
+                    default: System.out.print('*');
+                        break;
+                }
+            }
+            System.out.print('\n');
+        }
+    }
+
     private void findFinish(){
         //Для удобства нам лучше знать кординаты финишной точки
         for (int i = 0; i < matrix.length; ++i){
-            for (int j = 0; j < matrix[i].length; ++i){
+            for (int j = 0; j < matrix[i].length; ++j){
                 if(matrix[i][j] == -1){
                     finishRow = i;
                     finishColumn = j;
@@ -121,10 +197,10 @@ public class ShortestWayFinder {
         //Проверка существования конечной точки
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('X') != -1) {
-                System.out.println("Ошибка: Конечная точка не найдена");
                 return true;
             }
         }
+        System.out.println("Ошибка: Конечная точка не найдена");
         return false;
     }
 
@@ -132,10 +208,10 @@ public class ShortestWayFinder {
         //Проверка существования начальной точки
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('O') != -1){
-                System.out.println("Ошибка: Начальная точка не найдена");
                 return true;
             }
         }
+        System.out.println("Ошибка: Начальная точка не найдена");
         return false;
     }
 }
