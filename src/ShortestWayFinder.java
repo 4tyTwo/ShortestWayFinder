@@ -3,6 +3,8 @@ import java.util.Scanner;
 public class ShortestWayFinder {
 
     private int matrix[][]; //Представление матрицы, хранящее путь до текущей точки
+    private int rows, columns;
+    private int finishRow,finishColumn;
     /*Внутреннее представление матрицы:
     -3: Препядствие
     -2: Свободная клетка
@@ -29,14 +31,11 @@ public class ShortestWayFinder {
 
     public ShortestWayFinder(String[] source){
         //Инициализируется
-        int rows = source.length, columns = source[0].length();
+        rows = source.length;
+        columns = source[0].length();
         //Проверка на првильность длины каждой строки
-        for (int i = 1; i < rows; ++i){
-                if (source[i].length() != columns){
-                    System.out.println("Строки матрицы не равны по длине, дальнейшая работа невозможна");
-                    System.exit(1);
-                }
-        }
+        if(!(checkColumnsLength(source) && checkIfFinishExists(source) && checkIfStartExists(source)))
+            System.exit(1); //Выход из программы в случае неправильных данных
         matrix = new int[rows][columns];
         for (int i = 0; i < rows; ++i){
             for (int j = 0; j < columns; ++j){
@@ -45,7 +44,7 @@ public class ShortestWayFinder {
                         break;
                     case 'X': matrix[i][j] = -1; //Конечная клетка
                         break;
-                    case 'O': matrix[i][j] = -0; //Исходная клетка
+                    case 'O': matrix[i][j] = 0; //Исходная клетка
                         break;
                     default: matrix[i][j] = -2; //Неопределнность трактуется как свободная клетка
                         break;
@@ -54,7 +53,60 @@ public class ShortestWayFinder {
         }
     }
 
-    private boolean checkCollumnsLength(String[] checked) {
+    public int findPath(){
+        int step = 0, distance = 0;
+        boolean finishReached = false;
+        findFinish();
+        while(!finishReached && step < rows * columns){
+            for (int i = 0; i < rows; ++i){
+                for (int j = 0; j < columns; ++j) {
+                    //Условимся, что движение по диагонали с шагом 1 невозможно
+                    try {
+                        if(matrix[i][j] == distance){
+                            //4 клетки вокруг
+                            if(matrix[i - 1][j] == -2 || matrix[i - 1][j] == -1  ){
+                                matrix[i - 1][j] = distance + 1;
+                            }
+                            if(matrix[i + 1][j] == -2 || matrix[i + 1][j] == -1) {
+                                matrix[i + 1][j] = distance + 1;
+                            }
+                            if(matrix[i][j - 1] == -2 || matrix[i][j - 1] == -1) {
+                                matrix[i][j - 1] = distance + 1;
+                            }
+                            if(matrix[i][j + 1] == -2 || matrix[i][j + 1] == -1) {
+                                matrix[i][j + 1] = distance + 1;
+                            }
+                        }
+                    }
+                    catch (IndexOutOfBoundsException e){
+                        //pass
+                        //TO DO заменить на нормальные проверки
+                    }
+                }
+            }
+            distance++;
+            if (matrix[finishRow][finishColumn]!= -1){
+                //printMatrix();
+                return distance;
+            }
+        }
+        return -1; //Путь не найден
+    }
+
+    private void findFinish(){
+        //Для удобства нам лучше знать кординаты финишной точки
+        for (int i = 0; i < matrix.length; ++i){
+            for (int j = 0; j < matrix[i].length; ++i){
+                if(matrix[i][j] == -1){
+                    finishRow = i;
+                    finishColumn = j;
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean checkColumnsLength(String[] checked) {
         //Проверка длины строк, она додна быть одинаковой
         for (int i = 1; i < checked.length; ++i) {
             if (checked[i].length() != checked[0].length()) {
@@ -65,7 +117,7 @@ public class ShortestWayFinder {
         return true;
     }
 
-    private boolean checlIfFinishExists(String[] checked){
+    private boolean checkIfFinishExists(String[] checked){
         //Проверка существования конечной точки
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('X') != -1) {
@@ -76,7 +128,7 @@ public class ShortestWayFinder {
         return false;
     }
 
-    private boolean checlIfStartExists(String[] checked){
+    private boolean checkIfStartExists(String[] checked){
         //Проверка существования начальной точки
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('O') != -1){
