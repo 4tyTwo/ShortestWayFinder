@@ -214,7 +214,7 @@ public class ShortestWayFinder {
             }
         }
         if (finishCounter != 1){
-            System.out.println("Ошибка: Конечная точка не найдена или неединственна");
+            System.out.println("Ошибка: Конечная точка не найдена или не единственна");
             return false;
         }
         return true;
@@ -229,7 +229,7 @@ public class ShortestWayFinder {
             }
         }
         if(startCounter != 1) {
-            System.out.println("Ошибка: Начальная точка не найдена или неединственна");
+            System.out.println("Ошибка: Начальная точка не найдена или не единственна");
             return false;
         }
         return true;
