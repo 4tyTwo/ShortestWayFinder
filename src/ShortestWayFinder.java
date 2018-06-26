@@ -18,22 +18,30 @@ public class ShortestWayFinder {
 
     public static void main(String[] args){
         //Пока ради скорости отключено
-        /*Scanner reader = new Scanner(System.in);
-        System.out.print("Введите размеры матрицы в формате строки столбцы: ");
+        Scanner reader = new Scanner(System.in);
+        System.out.print("Введите количесвто строк матрицы: ");
         int rows = reader.nextInt();
         String[] map = new String[rows];
         System.out.println("Введите матрицу");
         reader.nextLine();
         for (int i = 0; i < rows; ++i){
             map[i] = reader.nextLine();
-        }*/
-        String[] map = {"****X",
-                        "*###*",
+        }
+        /*String[] map = {"****X",
+                        "*####",
                         "*****",
                         "***#*",
-                        "*O***"};
+                        "*O***"};*/
         ShortestWayFinder swf = new ShortestWayFinder(map);
-        swf.findPath();
+        int distance = swf.findPath();
+        if (distance > 0) {
+            System.out.println("Кратчайший путь " + String.valueOf(distance) + "\nВизуализация:");
+            swf.printMatrix();
+        }
+        else{
+            System.out.println("Путь не был обнаружен");
+        }
+
     }
 
     public ShortestWayFinder(String[] source){
@@ -41,7 +49,7 @@ public class ShortestWayFinder {
         rows = source.length;
         columns = source[0].length();
         //Проверка на првильность длины каждой строки
-        if(!(checkColumnsLength(source) && checkIfFinishExists(source) && checkIfStartExists(source)))
+        if(!(checkColumnsLength(source) && checkIfFinishExistsAndSingle(source) && checkIfStartExistsAndSingle(source)))
             System.exit(1); //Выход из программы в случае неправильных данных
         matrix = new int[rows][columns];
         for (int i = 0; i < rows; ++i){
@@ -66,9 +74,10 @@ public class ShortestWayFinder {
             System.arraycopy(matrix[i], 0, tmpMatrix[i], 0, columns);
         }
         int step = 0, distance = 0;
-        boolean finishReached = false;
+        boolean finishReached = false, deadlock = false;
         findFinish();
-        while(!finishReached && step < rows * columns){
+        while(!finishReached && !deadlock){
+            deadlock = true; //Если за итерацию путь не был продолжен, то мы попали в неразрешимую ситуацию
             for (int i = 0; i < rows; ++i){
                 for (int j = 0; j < columns; ++j) {
                     //Условимся, что движение по диагонали с шагом 1 невозможно
@@ -77,21 +86,25 @@ public class ShortestWayFinder {
                             if (i - 1 >= 0) {
                                 if (tmpMatrix[i - 1][j] == -2 || tmpMatrix[i - 1][j] == -1) {
                                     tmpMatrix[i - 1][j] = distance + 1;
+                                    deadlock = false;
                                 }
                             }
                             if (i + 1 < rows) {
                                 if (tmpMatrix[i + 1][j] == -2 || tmpMatrix[i + 1][j] == -1) {
                                     tmpMatrix[i + 1][j] = distance + 1;
+                                    deadlock = false;
                                 }
                             }
                             if (j - 1 >= 0) {
                                 if (tmpMatrix[i][j - 1] == -2 || tmpMatrix[i][j - 1] == -1) {
                                     tmpMatrix[i][j - 1] = distance + 1;
+                                    deadlock = false;
                                 }
                             }
                             if (j + 1 < columns) {
                                 if (tmpMatrix[i][j + 1] == -2 || tmpMatrix[i][j + 1] == -1) {
                                     tmpMatrix[i][j + 1] = distance + 1;
+                                    deadlock = false;
                                 }
                             }
                         }
@@ -101,7 +114,6 @@ public class ShortestWayFinder {
             if (tmpMatrix[finishRow][finishColumn]!= -1){
                 path = new Point[distance+1];
                 createPath(tmpMatrix);
-                printMatrix();
                 return distance;
             }
         }
@@ -193,25 +205,33 @@ public class ShortestWayFinder {
         return true;
     }
 
-    private boolean checkIfFinishExists(String[] checked){
+    private boolean checkIfFinishExistsAndSingle(String[] checked){
         //Проверка существования конечной точки
+        int finishCounter = 0;
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('X') != -1) {
-                return true;
+                ++finishCounter;
             }
         }
-        System.out.println("Ошибка: Конечная точка не найдена");
-        return false;
+        if (finishCounter != 1){
+            System.out.println("Ошибка: Конечная точка не найдена или неединственна");
+            return false;
+        }
+        return true;
     }
 
-    private boolean checkIfStartExists(String[] checked){
+    private boolean checkIfStartExistsAndSingle(String[] checked){
         //Проверка существования начальной точки
+        int startCounter = 0;
         for (int i = 0; i < checked.length; ++i) {
             if (checked[i].indexOf('O') != -1){
-                return true;
+                ++startCounter;
             }
         }
-        System.out.println("Ошибка: Начальная точка не найдена");
-        return false;
+        if(startCounter != 1) {
+            System.out.println("Ошибка: Начальная точка не найдена или неединственна");
+            return false;
+        }
+        return true;
     }
 }
