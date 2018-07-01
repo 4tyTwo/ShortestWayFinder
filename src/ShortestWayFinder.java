@@ -112,7 +112,7 @@ public class ShortestWayFinder {
             }
             distance++;
             if (tmpMatrix[finishRow][finishColumn]!= -1){
-                path = new Point[distance+1];
+                path = new Point[distance];
                 createPath(tmpMatrix);
                 return distance;
             }
