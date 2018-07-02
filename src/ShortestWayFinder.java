@@ -19,7 +19,7 @@ public class ShortestWayFinder {
     public static void main(String[] args){
         //Пока ради скорости отключено
         Scanner reader = new Scanner(System.in);
-        System.out.print("Введите количесвто строк матрицы: ");
+        System.out.print("Введите количество строк матрицы: ");
         int rows = reader.nextInt();
         String[] map = new String[rows];
         System.out.println("Введите матрицу");
