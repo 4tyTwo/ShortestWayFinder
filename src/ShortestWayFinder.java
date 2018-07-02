@@ -41,7 +41,7 @@ public class ShortestWayFinder {
         else{
             System.out.println("Путь не был обнаружен");
         }
-
+        reader.nextLine();
     }
 
     public ShortestWayFinder(String[] source){
