@@ -21,6 +21,11 @@ public class ShortestWayFinder {
         Scanner reader = new Scanner(System.in);
         System.out.print("Введите количество строк матрицы: ");
         int rows = reader.nextInt();
+        if (rows <= 0){
+            System.out.println("Недопустимый размер");
+            reader.nextLine();
+            System.exit(1);
+        }
         String[] map = new String[rows];
         System.out.println("Введите матрицу");
         reader.nextLine();
@@ -46,11 +51,15 @@ public class ShortestWayFinder {
 
     public ShortestWayFinder(String[] source){
         //Инициализируется
+        Scanner exitReader = new Scanner(System.in);
         rows = source.length;
         columns = source[0].length();
         //Проверка на првильность длины каждой строки
-        if(!(checkColumnsLength(source) && checkIfFinishExistsAndSingle(source) && checkIfStartExistsAndSingle(source)))
+        if(!(checkColumnsLength(source) && checkIfFinishExistsAndSingle(source) && checkIfStartExistsAndSingle(source))){
+            exitReader.nextLine(); //Ждет ввода, единственный адекватный способ приостановить программу чтобы пользователь ознакомился с ошибкой
             System.exit(1); //Выход из программы в случае неправильных данных
+
+        }
         matrix = new int[rows][columns];
         for (int i = 0; i < rows; ++i){
             for (int j = 0; j < columns; ++j){
