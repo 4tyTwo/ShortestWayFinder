@@ -22,7 +22,8 @@ public class ShortestWayFinder {
         System.out.print("Введите количество строк матрицы: ");
         int rows = reader.nextInt();
         if (rows <= 0){
-            System.out.println("Недопустимый размер");
+            System.out.println("Недопустимый размер\nНажмите enter чтобы завершить выполнение");
+            reader.nextLine();
             reader.nextLine();
             System.exit(1);
         }
@@ -46,6 +47,8 @@ public class ShortestWayFinder {
         else{
             System.out.println("Путь не был обнаружен");
         }
+
+        System.out.println("Нажмите enter чтобы завершить выполнение");
         reader.nextLine();
     }
 
@@ -56,6 +59,7 @@ public class ShortestWayFinder {
         columns = source[0].length();
         //Проверка на првильность длины каждой строки
         if(!(checkColumnsLength(source) && checkIfFinishExistsAndSingle(source) && checkIfStartExistsAndSingle(source))){
+            System.out.println("Нажмите enter чтобы завершить выполнение");
             exitReader.nextLine(); //Ждет ввода, единственный адекватный способ приостановить программу чтобы пользователь ознакомился с ошибкой
             System.exit(1); //Выход из программы в случае неправильных данных
 
